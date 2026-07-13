@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сириус.Аренда</title>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <h1>Сириус.Аренда</h1>
+        <div class="user-info">
+            <span id="username-display" class="hidden" onclick="openProfileModal()"></span>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon">🌙</button>
+            <button id="logout-btn" class="btn btn-outline hidden" onclick="logout()">Выйти</button>
+        </div>
+    </header>
+
+    <div id="auth-section" class="auth-container">
+        <h2>Добро пожаловать</h2>
+        <div class="auth-tabs">
+            <button class="active" onclick="switchAuthTab('login', event)">Вход</button>
+            <button onclick="switchAuthTab('register', event)">Регистрация</button>
+        </div>
+        <div id="auth-alert" class="alert"></div>
+        
+        <div id="login-form">
+            <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" id="login-username" placeholder="username">
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="login-password" placeholder="password">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="login()">Войти</button>
+        </div>
+        
+        <div id="register-form" class="hidden">
+            <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" id="register-username" placeholder="username">
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="register-password" placeholder="мин. 6 символов">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="register()">Зарегистрироваться</button>
+        </div>
+
+        <div id="recover-form" class="hidden">
+            <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" id="recover-username" placeholder="username">
+            </div>
+            <div class="form-group">
+                <label>Новый пароль</label>
+                <input type="password" id="recover-password" placeholder="мин. 6 символов">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="recoverPassword()">Восстановить</button>
+        </div>
+    </div>
+
+    <nav id="main-nav" class="hidden">
+        <button class="active" onclick="switchTab('rooms', event)">Комнаты</button>
+        <button onclick="switchTab('my-bookings', event)">Мои бронирования</button>
+        <button onclick="switchTab('search', event)">Поиск</button>
+        <button id="admin-rooms-tab" class="hidden" onclick="switchTab('admin-rooms', event)">Комнаты</button>
+        <button id="admin-users-tab" class="hidden" onclick="switchTab('admin-users', event)">Пользователи</button>
+        <button id="admin-bookings-tab" class="hidden" onclick="switchTab('admin-bookings', event)">Все бронирования</button>
+        <button id="admin-stats-tab" class="hidden" onclick="switchTab('admin-stats', event)">Статистика</button>
+    </nav>
+
+    <div id="main-section" class="container hidden">
+        
+        <div id="rooms-tab">
+            <h2>Доступные пространства</h2>
+            <div id="rooms-grid" class="rooms-grid"></div>
+        </div>
+
+        <div id="my-bookings-tab" class="hidden">
+            <h2>Мои бронирования</h2>
+            <div class="checkbox-group">
+                <input type="checkbox" id="show-cancelled" onchange="loadMyBookings()">
+                <label for="show-cancelled">Показать отменённые</label>
+            </div>
+            <div id="my-bookings-list" class="bookings-list"></div>
+        </div>
+
+        <div id="search-tab" class="hidden">
+            <h2>Поиск свободных пространств</h2>
+            <div class="search-form">
+                <h3>Фильтры</h3>
+                <div class="search-grid">
+                    <div class="form-group">
+                        <label>Дата и время начала *</label>
+                        <input type="datetime-local" id="search-start">
+                    </div>
+                    <div class="form-group">
+                        <label>Дата и время окончания *</label>
+                        <input type="datetime-local" id="search-end">
+                    </div>
+                    <div class="form-group">
+                        <label>Мин. вместимость</label>
+                        <input type="number" id="search-capacity" min="1" placeholder="Любая">
+                    </div>
+                    <div class="form-group">
+                        <label>Оборудование (через запятую)</label>
+                        <input type="text" id="search-equipment" placeholder="проектор, доска">
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;" onclick="searchAvailable()">Найти</button>
+            </div>
+            <div id="search-results" class="rooms-grid"></div>
+        </div>
+
+        <div id="admin-rooms-tab-content" class="hidden">
+            <h2>Комнаты</h2>
+            <button class="btn btn-primary" style="margin-top: 1rem; margin-bottom: 1rem;" onclick="openCreateRoomModal()">+ Создать комнату</button>
+            <div id="admin-rooms-grid" class="rooms-grid"></div>
+        </div>
+
+        <div id="admin-users-tab-content" class="hidden">
+            <h2>Пользователи</h2>
+            <button class="btn btn-primary" style="margin-top: 1rem; margin-bottom: 1rem;" onclick="openCreateAccountModal()">+ Создать аккаунт</button>
+            <div id="users-list" class="bookings-list"></div>
+        </div>
+
+        <div id="admin-bookings-tab-content" class="hidden">
+            <h2>Все бронирования</h2>
+            <div class="filter-bar">
+                <select id="filter-status" onchange="loadAllBookings()">
+                    <option value="all">Все статусы</option>
+                    <option value="active">Активные</option>
+                    <option value="completed">Завершённые</option>
+                    <option value="cancelled">Отменённые</option>
+                </select>
+                <div class="form-group" style="margin: 0;">
+                    <label style="font-size: 0.75rem;">Начало брони</label>
+                    <input type="datetime-local" id="filter-start" onchange="loadAllBookings()">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label style="font-size: 0.75rem;">Окончание брони</label>
+                    <input type="datetime-local" id="filter-end" onchange="loadAllBookings()">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label style="font-size: 0.75rem;">Оборудование</label>
+                    <input type="text" id="filter-equipment" placeholder="проектор" onchange="loadAllBookings()">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label style="font-size: 0.75rem;">Мин. вместимость</label>
+                    <input type="number" id="filter-capacity" min="1" placeholder="Любая" onchange="loadAllBookings()">
+                </div>
+            </div>
+            <div id="all-bookings-list" class="bookings-list"></div>
+        </div>
+
+        <div id="admin-stats-tab-content" class="hidden">
+            <h2>Статистика</h2>
+            <div id="stats-grid" class="stats-grid"></div>
+            <h3 style="margin-top: 2rem;">Популярные комнаты</h3>
+            <div id="popular-rooms" class="popular-rooms-grid"></div>
+        </div>
+    </div>
+
+    <div id="booking-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Бронирование: <span id="modal-room-name"></span></h3>
+                <span class="close-btn" onclick="closeModal('booking-modal')">&times;</span>
+            </div>
+            <div id="booking-alert" class="alert"></div>
+            <input type="hidden" id="booking-room-id">
+            <div class="form-group">
+                <label>Начало</label>
+                <input type="datetime-local" id="booking-start">
+            </div>
+            <div class="form-group">
+                <label>Окончание</label>
+                <input type="datetime-local" id="booking-end">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="createBooking()">Забронировать</button>
+        </div>
+    </div>
+
+    <div id="create-room-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="room-modal-title">Создание комнаты</h3>
+                <span class="close-btn" onclick="closeModal('create-room-modal')">&times;</span>
+            </div>
+            <div id="create-room-alert" class="alert"></div>
+            <input type="hidden" id="room-edit-id">
+            <div class="form-group">
+                <label>Название</label>
+                <input type="text" id="room-name">
+            </div>
+            <div class="form-group">
+                <label>Вместимость</label>
+                <input type="number" id="room-capacity" min="1">
+            </div>
+            <div class="form-group">
+                <label>Оборудование (через запятую)</label>
+                <input type="text" id="room-equipment" placeholder="проектор, доска">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="saveRoom()">Сохранить</button>
+        </div>
+    </div>
+
+    <div id="schedule-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px; height: 80vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h3>Расписание: <span id="schedule-room-name"></span></h3>
+                <span class="close-btn" onclick="closeModal('schedule-modal')">&times;</span>
+            </div>
+            <div id="schedule-calendar" style="flex-grow: 1; overflow: auto;"></div>
+        </div>
+    </div>
+
+    <div id="create-account-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Создание аккаунта</h3>
+                <span class="close-btn" onclick="closeModal('create-account-modal')">&times;</span>
+            </div>
+            <div id="create-account-alert" class="alert"></div>
+            <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" id="account-username">
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="account-password">
+            </div>
+            <div class="form-group">
+                <label>Роль</label>
+                <select id="account-role">
+                    <option value="user">Пользователь</option>
+                    <option value="admin">Администратор</option>
+                </select>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="createAccount()">Создать</button>
+        </div>
+    </div>
+
+    <div id="edit-user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Редактирование пользователя</h3>
+                <span class="close-btn" onclick="closeModal('edit-user-modal')">&times;</span>
+            </div>
+            <div id="edit-user-alert" class="alert"></div>
+            <input type="hidden" id="edit-user-id">
+            <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" id="edit-user-username">
+            </div>
+            <div class="form-group">
+                <label>Роль</label>
+                <select id="edit-user-role">
+                    <option value="user">Пользователь</option>
+                    <option value="admin">Администратор</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Новый пароль (оставьте пустым, чтобы не менять)</label>
+                <input type="password" id="edit-user-password" placeholder="мин. 6 символов">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="updateUser()">Сохранить</button>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Профиль пользователя</h3>
+                <span class="close-btn" onclick="closeModal('profile-modal')">&times;</span>
+            </div>
+            <div id="profile-alert" class="alert"></div>
+            <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" id="profile-username">
+            </div>
+            <div class="form-group">
+                <label>Роль</label>
+                <input type="text" id="profile-role" readonly>
+            </div>
+            <div class="form-group">
+                <label>Текущий пароль</label>
+                <input type="password" id="profile-old-password" placeholder="для смены пароля">
+            </div>
+            <div class="form-group">
+                <label>Новый пароль</label>
+                <input type="password" id="profile-new-password" placeholder="мин. 6 символов">
+            </div>
+            <button class="btn btn-primary btn-full" onclick="updateProfile()">Сохранить</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
