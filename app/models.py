@@ -20,7 +20,7 @@ class Room(Base):
     capacity = Column(Integer, nullable=False)
     equipment = Column(String, default="")
     
-    bookings = relationship("Booking", back_populates="room")
+    bookings = relationship("Booking", back_populates="room", cascade="all, delete-orphan")
 
 class Booking(Base):
     __tablename__ = "bookings"
