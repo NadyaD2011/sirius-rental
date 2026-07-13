@@ -46,7 +46,7 @@ function switchAuthTab(tab, event) {
     
     document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
     document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
-    document.getElementById('recover-form').classList.add('hidden'); // Всегда скрываем восстановление при переключении табов
+    document.getElementById('recover-form').classList.add('hidden');
     document.getElementById('auth-alert').style.display = 'none';
 }
 
@@ -657,7 +657,6 @@ async function loadAllBookings() {
         
         if (statusFilter !== 'all') {
             if (statusFilter === 'completed') {
-                // Завершённые = активные, но время окончания прошло
                 const now = new Date();
                 filtered = filtered.filter(b => b.status === 'active' && new Date(b.end_time) < now);
             } else {
@@ -688,7 +687,6 @@ async function loadAllBookings() {
             const roomCapacity = room ? room.capacity : '?';
             const roomEquipment = room && room.equipment && room.equipment.length > 0 ? room.equipment.join(', ') : 'Нет';
             
-            // Фильтрация по оборудованию и вместимости
             if (equipmentFilter && !roomEquipment.toLowerCase().includes(equipmentFilter)) return;
             if (capacityFilter && roomCapacity < parseInt(capacityFilter)) return;
             

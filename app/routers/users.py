@@ -33,7 +33,6 @@ class PasswordRecover(BaseModel):
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    """Регистрация нового пользователя"""
     existing = db.query(User).filter(User.username == user.username).first()
     if existing:
         raise HTTPException(status_code=409, detail="Пользователь уже существует")
@@ -54,7 +53,6 @@ def create_account(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    """Создание аккаунта с выбором роли (только для админов)"""
     existing = db.query(User).filter(User.username == account.username).first()
     if existing:
         raise HTTPException(status_code=409, detail="Пользователь уже существует")
@@ -77,7 +75,6 @@ def get_users_list(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    """Список всех пользователей (только для админов)"""
     return db.query(User).all()
 
 @router.put("/{user_id}/role")
@@ -87,7 +84,6 @@ def update_user_role(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    """Изменение роли пользователя (только для админов)"""
     if role_data.role not in ["user", "admin"]:
         raise HTTPException(status_code=400, detail="Роль должна быть 'user' или 'admin'")
     
@@ -106,7 +102,6 @@ def update_username(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Изменение имени пользователя"""
     if user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Нет прав")
     
@@ -128,7 +123,6 @@ def change_password(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Смена пароля текущего пользователя"""
     if not verify_password(data.old_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Неверный текущий пароль")
     
@@ -143,7 +137,6 @@ def reset_user_password(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    """Сброс пароля пользователя (только для админов)"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -157,7 +150,6 @@ def recover_password(
     data: PasswordRecover,
     db: Session = Depends(get_db)
 ):
-    """Восстановление пароля по имени пользователя"""
     user = db.query(User).filter(User.username == data.username).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -172,7 +164,6 @@ def delete_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    """Удаление пользователя (только для админов)"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -189,7 +180,6 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    """Вход и получение JWT токена"""
     user = db.query(User).filter(User.username == form_data.username).first()
     
     if not user or not verify_password(form_data.password, user.hashed_password):
@@ -206,5 +196,4 @@ def login(
 
 @router.get("/me", response_model=UserOut)
 def get_me(current_user: User = Depends(get_current_user)):
-    """Информация о текущем пользователе"""
     return current_user

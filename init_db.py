@@ -1,18 +1,12 @@
-"""
-Скрипт инициализации базы данных.
-Создаёт первого администратора при первом запуске.
-"""
 from app.database import engine, Base, SessionLocal
 from app.models import User
 from app.auth import hash_password
 
 def init_db():
-    # Создаём таблицы
     Base.metadata.create_all(bind=engine)
     
     db = SessionLocal()
     try:
-        # Проверяем, есть ли уже админ
         admin = db.query(User).filter(User.username == "admin").first()
         if not admin:
             admin = User(

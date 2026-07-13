@@ -26,7 +26,6 @@ def create_booking(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Создание бронирования"""
     room = db.query(Room).filter(Room.id == booking.room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Пространство не найдено")
@@ -55,7 +54,6 @@ def cancel_booking(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Отмена бронирования (владелец или админ)"""
     db_booking = db.query(Booking).filter(Booking.id == booking_id).first()
     if not db_booking:
         raise HTTPException(status_code=404, detail="Бронирование не найдено")
@@ -73,7 +71,6 @@ def get_my_bookings(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Мои бронирования (с опцией показать отменённые)"""
     query = db.query(Booking).filter(Booking.user_id == current_user.id)
     if not include_cancelled:
         query = query.filter(Booking.status == "active")
@@ -84,7 +81,6 @@ def get_all_bookings(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin)
 ):
-    """Все бронирования всех пользователей (только для админов)"""
     return db.query(Booking).order_by(Booking.start_time.desc()).all()
 
 @router.get("/room/{room_id}", response_model=List[BookingOut])
@@ -95,7 +91,6 @@ def get_room_bookings(
     end_date: Optional[date] = Query(None, description="Конец периода"),
     db: Session = Depends(get_db)
 ):
-    """Бронирования комнаты (один день или период)"""
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Пространство не найдено")

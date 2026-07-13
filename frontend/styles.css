@@ -189,7 +189,6 @@ body.dark-theme .alert-success { background: #064e3b; color: #6ee7b7; }
 .popular-room-card h4 { margin-bottom: 0.5rem; font-size: 0.875rem; }
 .popular-room-card .count { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
 
-/* Кастомный чекбокс */
 .checkbox-group {
     margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;
 }
@@ -227,7 +226,6 @@ body.dark-theme .alert-success { background: #064e3b; color: #6ee7b7; }
     background: var(--card-bg); color: var(--text);
 }
 
-/* FullCalendar локализация */
 #schedule-calendar .fc-header-toolbar { flex-wrap: wrap; gap: 0.5rem; }
 #schedule-calendar .fc-button-primary { background-color: var(--primary) !important; border-color: var(--primary) !important; }
 #schedule-calendar .fc-button-primary:hover { background-color: var(--primary-hover) !important; }
