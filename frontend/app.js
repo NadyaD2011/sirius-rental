@@ -46,7 +46,7 @@ function switchAuthTab(tab, event) {
     
     document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
     document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
-    document.getElementById('recover-form').classList.add('hidden');
+    document.getElementById('recover-form').classList.add('hidden'); // Всегда скрываем восстановление при переключении табов
     document.getElementById('auth-alert').style.display = 'none';
 }
 
@@ -706,7 +706,6 @@ async function loadAllBookings() {
             list.appendChild(item);
         });
         
-        // Добавляем счётчик после фильтрации
         const finalCount = list.children.length;
         const finalWord = pluralize(finalCount, 'бронирование', 'бронирования', 'бронирований');
         list.insertAdjacentHTML('beforebegin', `<p style="color: var(--text-light); margin-top: 1rem;">Найдено: ${finalCount} ${finalWord}</p>`);
