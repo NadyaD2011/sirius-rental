@@ -16,9 +16,9 @@ def init_db():
             )
             db.add(admin)
             db.commit()
-            print("✅ Администратор создан: admin / admin123")
+            print("Администратор создан: admin / admin123")
         else:
-            print("ℹ️  Администратор уже существует")
+            print("Администратор уже существует")
     finally:
         db.close()
 
